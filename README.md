@@ -16,7 +16,7 @@ Construct a new tado° client and set up authentication using the `WithOAuthClie
 `WithOAuthClient` expects an initial authentication token and returns a `tado.Client` that will then automatically refresh the access token.
 
 ```go
-// get intial token
+// get initial token
 token, _ := tado.DefaultOauth2Config.PasswordCredentialsToken(context.Background(), "username", "password")
 
 // create tado client that auto-refreshes access token
