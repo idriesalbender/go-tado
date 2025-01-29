@@ -29,6 +29,7 @@ var DefaultOAuth2Config = &oauth2.Config{
 	ClientSecret: TadoAPIClientSecret,
 	Endpoint: oauth2.Endpoint{
 		TokenURL: TadoAPIAuthURL,
+		AuthURL:  TadoAPIAuthURL,
 	},
 }
 
