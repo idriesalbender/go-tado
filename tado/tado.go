@@ -137,7 +137,7 @@ func (c *Client) NewRequest(method, path string, body interface{}, opts ...Reque
 		return nil, fmt.Errorf("BaseURL must have a trailing slash, but %q does not", c.BaseURL)
 	}
 
-	url, err := c.BaseURL.Parse(path)
+	url, err := url.JoinPath(c.BaseURL.String(), path) // use `url.JoinPath` instead of `c.BaseURL.Parse` to handle absolute paths
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (c *Client) NewRequest(method, path string, body interface{}, opts ...Reque
 		}
 	}
 
-	req, err := http.NewRequest(method, url.String(), buf)
+	req, err := http.NewRequest(method, url, buf)
 	if err != nil {
 		return nil, err
 	}
