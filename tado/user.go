@@ -11,15 +11,15 @@ type UserService service
 
 // User represents a Tado user.
 type User struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	ID       string `json:"id"`
+	Name     string `json:"name,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Username string `json:"username,omitempty"`
+	ID       string `json:"id,omitempty"`
 	Homes    []struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
-	} `json:"homes"`
-	Locale string `json:"locale"`
+		ID   int    `json:"id,omitempty"`
+		Name string `json:"name,omitempty"`
+	} `json:"homes,omitempty"`
+	Locale string `json:"locale,omitempty"`
 	// MobileDevices []MobileDevice
 }
 
