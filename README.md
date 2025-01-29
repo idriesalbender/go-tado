@@ -1,5 +1,8 @@
 # go-tado
 
+> [!CAUTION]
+> This is a side-project and still very much a work in progress.
+
 go-tado is a Go client library for the tado° API.
 
 ## Usage
