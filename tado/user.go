@@ -19,8 +19,8 @@ type User struct {
 		ID   int    `json:"id,omitempty"`
 		Name string `json:"name,omitempty"`
 	} `json:"homes,omitempty"`
-	Locale string `json:"locale,omitempty"`
-	// MobileDevices []MobileDevice
+	Locale        string         `json:"locale,omitempty"`
+	MobileDevices []MobileDevice `json:"mobileDevices,omitempty"`
 }
 
 // Get returns the authenticated user.
