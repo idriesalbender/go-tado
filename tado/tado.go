@@ -46,8 +46,9 @@ type Client struct {
 		credentials *credentials
 	}
 
-	User *UserService
-	Home *HomeService
+	User         *UserService
+	Home         *HomeService
+	MobileDevice *MobileDeviceService
 }
 
 type service struct {
@@ -109,6 +110,7 @@ func (c *Client) initialize() {
 
 	c.User = (*UserService)(&c.common)
 	c.Home = (*HomeService)(&c.common)
+	c.MobileDevice = (*MobileDeviceService)(&c.common)
 }
 
 // clone returns a copy of the client. Must be initialized before use using
