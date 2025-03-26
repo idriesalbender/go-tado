@@ -15,7 +15,7 @@ type HomeService service
 
 const (
 	PresenceHome Presence = "HOME"
-	PresenceAway          = "AWAY"
+	PresenceAway Presence = "AWAY"
 )
 
 // Home represents a Tado home.

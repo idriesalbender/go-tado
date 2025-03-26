@@ -15,36 +15,19 @@ import (
 )
 
 const (
-	DefaultBaseURL      = "https://my.tado.com/api/v2/"
-	DefaultUserAgent    = "go-tado"
-	TadoAPIClientID     = "public-api-preview"
-	TadoAPIClientSecret = "4HJGRffVR8xb3XdEUQpjgZ1VplJi6Xgw"
-	TadoAPIAuthURL      = "https://auth.tado.com/oauth/token"
+	DefaultBaseURL   = "https://my.tado.com/api/v2/"
+	DefaultUserAgent = "go-tado"
 )
 
 var ErrNonNilContext = errors.New("context must not be nil")
 
-var DefaultOAuth2Config = &oauth2.Config{
-	ClientID:     TadoAPIClientID,
-	ClientSecret: TadoAPIClientSecret,
-	Endpoint: oauth2.Endpoint{
-		TokenURL: TadoAPIAuthURL,
-		AuthURL:  TadoAPIAuthURL,
-	},
-}
-
 // Client is the main client for interacting with the Tado API.
 type Client struct {
-	client    *http.Client
-	BaseURL   *url.URL
-	UserAgent string
-	common    service
-
-	auth struct {
-		config      *oauth2.Config
-		token       *oauth2.Token
-		credentials *credentials
-	}
+	authenticator Authenticator
+	client        *http.Client
+	BaseURL       *url.URL
+	UserAgent     string
+	common        service
 
 	User         *UserService
 	Home         *HomeService
@@ -55,47 +38,43 @@ type service struct {
 	client *Client
 }
 
-type credentials struct {
-	username string
-	password string
+type ClientOption func(*Client)
+
+func WithAuthenticator(auth Authenticator) ClientOption {
+	return func(c *Client) {
+		c.authenticator = auth
+	}
 }
 
-// NewClient returns a new Tado API client. If httpClient is nil, a default
-// http.Client is used.
-func NewClient(httpClient *http.Client) *Client {
-	if httpClient == nil {
-		httpClient = &http.Client{}
+// NewClient returns a new Client instance with the given options.
+//
+// The Client returned by NewClient is not initialized until the first call to
+// a method that requires authentication. If no Authenticator is provided, a
+// DeviceAuthenticator with the default OAuth2 configuration is used.
+func NewClient(opts ...ClientOption) *Client {
+	tc := &Client{}
+	for _, opt := range opts {
+		opt(tc)
 	}
 
-	hc := *httpClient
-
-	client := &Client{client: &hc}
-	client.initialize()
-	return client
-}
-
-// WithOAuthClient sets up the client to use an OAuth2 client with the provided
-// oauth2.Config and token. If config is nil, the default Tado OAuth2
-// configuration is used. Token must not be nil.
-func (c *Client) WithOAuthClient(ctx context.Context, config *oauth2.Config, token *oauth2.Token) *Client {
-	clone := c.clone()
-	defer clone.initialize()
-
-	if config == nil {
-		config = DefaultOAuth2Config
+	if tc.authenticator == nil {
+		tc.authenticator = NewDeviceAuthenticator(nil)
 	}
 
-	tokenSource := config.TokenSource(ctx, token)
-	clone.client = oauth2.NewClient(ctx, tokenSource)
-
-	return clone
+	tc.initialize()
+	return tc
 }
 
 // initialize sets up the client with default values and initializes the
 // services.
 func (c *Client) initialize() {
 	if c.client == nil {
-		c.client = &http.Client{}
+		token, err := c.authenticator.TokenSource(context.Background())
+		if err != nil {
+			panic(err)
+		}
+
+		c.client = oauth2.NewClient(context.Background(), token)
 	}
 
 	if c.BaseURL == nil {
@@ -115,23 +94,23 @@ func (c *Client) initialize() {
 
 // clone returns a copy of the client. Must be initialized before use using
 // Client.initialize.
-func (c *Client) clone() *Client {
-	clone := Client{
-		client:    &http.Client{},
-		BaseURL:   c.BaseURL,
-		UserAgent: c.UserAgent,
-		common:    c.common,
-	}
+// func (c *Client) clone() *Client {
+// 	clone := Client{
+// 		client:    &http.Client{},
+// 		BaseURL:   c.BaseURL,
+// 		UserAgent: c.UserAgent,
+// 		common:    c.common,
+// 	}
 
-	if c.client != nil {
-		clone.client.Transport = c.client.Transport
-		clone.client.CheckRedirect = c.client.CheckRedirect
-		clone.client.Jar = c.client.Jar
-		clone.client.Timeout = c.client.Timeout
-	}
+// 	if c.client != nil {
+// 		clone.client.Transport = c.client.Transport
+// 		clone.client.CheckRedirect = c.client.CheckRedirect
+// 		clone.client.Jar = c.client.Jar
+// 		clone.client.Timeout = c.client.Timeout
+// 	}
 
-	return &clone
-}
+// 	return &clone
+// }
 
 type RequestOption func(req *http.Request)
 
@@ -265,8 +244,8 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Res
 }
 
 // roundTripperFunc creates a RoundTripper (transport).
-type roundTripperFunc func(*http.Request) (*http.Response, error)
+// type roundTripperFunc func(*http.Request) (*http.Response, error)
 
-func (fn roundTripperFunc) RoundTrip(r *http.Request) (*http.Response, error) {
-	return fn(r)
-}
+// func (fn roundTripperFunc) RoundTrip(r *http.Request) (*http.Response, error) {
+// 	return fn(r)
+// }
