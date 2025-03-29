@@ -48,9 +48,26 @@ func WithAuthenticator(auth Authenticator) ClientOption {
 
 // NewClient returns a new Client instance with the given options.
 //
-// The Client returned by NewClient is not initialized until the first call to
-// a method that requires authentication. If no Authenticator is provided, a
-// DeviceAuthenticator with the default OAuth2 configuration is used.
+// If no Authenticator is provided, a tado.DeviceAuthenticator with the default
+// oauth2.Config configuration is used.
+//
+// Example usage without authenticator:
+//
+//	client := tado.NewClient()
+//
+// Example usage with authenticator with custom oauth2.Config:
+//
+//	config := &oauth2.Config{
+//		ClientID: TadoDeviceAuthClientID,
+//		Endpoint: oauth2.Endpoint{
+//			DeviceAuthURL: "https://login.tado.com/oauth2/device_authorize",
+//			TokenURL:      "https://login.tado.com/oauth2/token",
+//		},
+//		Scopes: []string{"offline-access"},
+//	}
+//
+//	auth := tado.NewDeviceAuthenticator(config)
+//	client := tado.NewClient(tado.WithAuthenticator(auth))
 func NewClient(opts ...ClientOption) *Client {
 	tc := &Client{}
 	for _, opt := range opts {
