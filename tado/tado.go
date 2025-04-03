@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 
 	"golang.org/x/oauth2"
 )
@@ -22,16 +23,23 @@ const (
 var ErrNonNilContext = errors.New("context must not be nil")
 
 // Client is the main client for interacting with the Tado API.
+// The Client is safe for concurrent use by multiple goroutines.
 type Client struct {
 	authenticator Authenticator
 	client        *http.Client
-	BaseURL       *url.URL
-	UserAgent     string
+	baseURL       *url.URL
+	userAgent     string
 	common        service
 
 	User         *UserService
 	Home         *HomeService
 	MobileDevice *MobileDeviceService
+}
+
+// BaseURL returns a copy of the base URL configuration
+func (c *Client) BaseURL() *url.URL {
+	u := *c.baseURL
+	return &u
 }
 
 type service struct {
@@ -46,7 +54,8 @@ func WithAuthenticator(auth Authenticator) ClientOption {
 	}
 }
 
-// NewClient returns a new Client instance with the given options.
+// NewClient returns a new thread-safe Client instance with the given options.
+// The returned Client can be used concurrently from multiple goroutines.
 //
 // If no Authenticator is provided, a tado.DeviceAuthenticator with the default
 // oauth2.Config configuration is used.
@@ -85,28 +94,31 @@ func NewClient(opts ...ClientOption) *Client {
 // initialize sets up the client with default values and initializes the
 // services.
 func (c *Client) initialize() {
-	if c.client == nil {
-		token, err := c.authenticator.TokenSource(context.Background())
-		if err != nil {
-			panic(err)
+	var once sync.Once
+	once.Do(func() {
+		if c.client == nil {
+			token, err := c.authenticator.TokenSource(context.Background())
+			if err != nil {
+				panic(err)
+			}
+
+			c.client = oauth2.NewClient(context.Background(), token)
 		}
 
-		c.client = oauth2.NewClient(context.Background(), token)
-	}
+		if c.baseURL == nil {
+			c.baseURL, _ = url.Parse(DefaultBaseURL)
+		}
 
-	if c.BaseURL == nil {
-		c.BaseURL, _ = url.Parse(DefaultBaseURL)
-	}
+		if c.userAgent == "" {
+			c.userAgent = DefaultUserAgent
+		}
 
-	if c.UserAgent == "" {
-		c.UserAgent = DefaultUserAgent
-	}
+		c.common.client = c
 
-	c.common.client = c
-
-	c.User = (*UserService)(&c.common)
-	c.Home = (*HomeService)(&c.common)
-	c.MobileDevice = (*MobileDeviceService)(&c.common)
+		c.User = (*UserService)(&c.common)
+		c.Home = (*HomeService)(&c.common)
+		c.MobileDevice = (*MobileDeviceService)(&c.common)
+	})
 }
 
 // clone returns a copy of the client. Must be initialized before use using
@@ -131,12 +143,12 @@ func (c *Client) initialize() {
 
 type RequestOption func(req *http.Request)
 
-func (c *Client) NewRequest(method, path string, body interface{}, opts ...RequestOption) (*http.Request, error) {
-	if !strings.HasSuffix(c.BaseURL.Path, "/") {
-		return nil, fmt.Errorf("BaseURL must have a trailing slash, but %q does not", c.BaseURL)
+func (c *Client) NewRequest(method, path string, body any, opts ...RequestOption) (*http.Request, error) {
+	if !strings.HasSuffix(c.baseURL.Path, "/") {
+		return nil, fmt.Errorf("BaseURL must have a trailing slash, but %q does not", c.BaseURL())
 	}
 
-	url, err := c.BaseURL.Parse(strings.TrimPrefix(path, "/")) // trim prefix to prevent absolute paths from overwriting the base URL
+	url, err := c.baseURL.Parse(strings.TrimPrefix(path, "/")) // trim prefix to prevent absolute paths from overwriting the base URL
 	if err != nil {
 		return nil, err
 	}
@@ -161,8 +173,8 @@ func (c *Client) NewRequest(method, path string, body interface{}, opts ...Reque
 		req.Header.Set("Content-Type", "application/json")
 	}
 	req.Header.Set("Accept", "application/json")
-	if c.UserAgent != "" {
-		req.Header.Set("User-Agent", c.UserAgent)
+	if c.userAgent != "" {
+		req.Header.Set("User-Agent", c.userAgent)
 	}
 
 	for _, opt := range opts {
