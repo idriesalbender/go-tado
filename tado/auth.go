@@ -66,7 +66,6 @@ func (a *DeviceAuthenticator) TokenSource(ctx context.Context) (oauth2.TokenSour
 	}
 
 	fmt.Printf("Visit %s to log in.\n", deviceCode.VerificationURIComplete)
-	fmt.Printf("Enter the code: %s\n", deviceCode.UserCode)
 
 	token, err := a.config.DeviceAccessToken(ctx, deviceCode)
 	if err != nil {
