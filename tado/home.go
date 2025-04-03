@@ -33,25 +33,25 @@ type Home struct {
 		Supported bool `json:"supported"`
 		Enabled   bool `json:"enabled"`
 	} `json:"incidentDetection"`
-	Generation              string        `json:"generation"`
-	ZonesCount              int           `json:"zonesCount"`
-	Language                string        `json:"language"`
-	PreventFromSubscribing  bool          `json:"preventFromSubscribing"`
-	Skills                  []interface{} `json:"skills"`
-	ChristmasModeEnabled    bool          `json:"christmasModeEnabled"`
-	ShowAutoAssistReminders bool          `json:"showAutoAssistReminders"`
+	Generation              string `json:"generation"`
+	ZonesCount              int    `json:"zonesCount"`
+	Language                string `json:"language"`
+	PreventFromSubscribing  bool   `json:"preventFromSubscribing"`
+	Skills                  []any  `json:"skills"`
+	ChristmasModeEnabled    bool   `json:"christmasModeEnabled"`
+	ShowAutoAssistReminders bool   `json:"showAutoAssistReminders"`
 	ContactDetails          struct {
 		Name  string `json:"name"`
 		Email string `json:"email"`
 		Phone string `json:"phone"`
 	} `json:"contactDetails"`
 	Address struct {
-		AddressLine1 string      `json:"addressLine1"`
-		AddressLine2 interface{} `json:"addressLine2"`
-		ZipCode      string      `json:"zipCode"`
-		City         string      `json:"city"`
-		State        interface{} `json:"state"`
-		Country      string      `json:"country"`
+		AddressLine1 string `json:"addressLine1"`
+		AddressLine2 any    `json:"addressLine2"`
+		ZipCode      string `json:"zipCode"`
+		City         string `json:"city"`
+		State        any    `json:"state"`
+		Country      string `json:"country"`
 	} `json:"address"`
 	Geolocation struct {
 		Latitude  float64 `json:"latitude"`
@@ -101,8 +101,8 @@ type HeatingSystem struct {
 	} `json:"underfloorHeating"`
 }
 
-// FlowTemperaturOptimization represents the flow temperature optimization of a Tado home.
-type FlowTemperaturOptimization struct {
+// FlowTemperatureOptimization represents the flow temperature optimization of a Tado home.
+type FlowTemperatureOptimization struct {
 	HasMultipleBoilerControlDevices bool `json:"hasMultipleBoilerControlDevices"`
 	MaxFlowTemperature              int  `json:"maxFlowTemperature"`
 	MaxFlowTemperatureConstraints   struct {
@@ -189,13 +189,13 @@ func (s *HomeService) GetHeatingSystem(id int) (*HeatingSystem, error) {
 }
 
 // GetFlowTemperatureOptimization returns the flow temperature optimization of the home with the given ID.
-func (s *HomeService) GetFlowTemperatureOptimization(id int) (*FlowTemperaturOptimization, error) {
+func (s *HomeService) GetFlowTemperatureOptimization(id int) (*FlowTemperatureOptimization, error) {
 	req, err := s.client.NewRequest("GET", fmt.Sprintf("homes/%d/flowTemperatureOptimization", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var flowTemperatureOptimization *FlowTemperaturOptimization
+	var flowTemperatureOptimization *FlowTemperatureOptimization
 	_, err = s.client.Do(context.Background(), req, &flowTemperatureOptimization)
 	if err != nil {
 		return nil, err
