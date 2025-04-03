@@ -18,6 +18,7 @@ import (
 const (
 	DefaultBaseURL   = "https://my.tado.com/api/v2/"
 	DefaultUserAgent = "go-tado"
+	DefaultTimeout   = 10 // seconds
 )
 
 var ErrNonNilContext = errors.New("context must not be nil")
@@ -248,7 +249,13 @@ func (c *Client) BareDo(ctx context.Context, req *http.Request) (*Response, erro
 // is nil and no error occurs, the response is returned as is.
 //
 // The provided ctx must not be nil. If it is, Do returns ErrNonNilContext.
-func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Response, error) {
+func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, error) {
+	if ctx == nil {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(context.Background(), DefaultTimeout)
+		defer cancel()
+	}
+
 	res, err := c.BareDo(ctx, req)
 	if err != nil {
 		return res, err
