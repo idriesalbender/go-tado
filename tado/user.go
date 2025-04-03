@@ -11,16 +11,18 @@ type UserService service
 
 // User represents a Tado user.
 type User struct {
-	Name     string `json:"name,omitempty"`
-	Email    string `json:"email,omitempty"`
-	Username string `json:"username,omitempty"`
-	ID       string `json:"id,omitempty"`
-	Homes    []struct {
-		ID   int    `json:"id,omitempty"`
-		Name string `json:"name,omitempty"`
-	} `json:"homes,omitempty"`
+	Name          string         `json:"name,omitempty"`
+	Email         string         `json:"email,omitempty"`
+	Username      string         `json:"username,omitempty"`
+	ID            string         `json:"id,omitempty"`
+	Homes         []BareHome     `json:"homes,omitempty"`
 	Locale        string         `json:"locale,omitempty"`
 	MobileDevices []MobileDevice `json:"mobileDevices,omitempty"`
+}
+
+type BareHome struct {
+	ID   int    `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 // Get returns the authenticated user.
