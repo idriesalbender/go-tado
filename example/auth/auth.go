@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/idriesalbender/go-tado/tado"
@@ -11,7 +12,7 @@ func main() {
 	client := tado.NewClient()
 
 	// get the authenticated user
-	me, err := client.User.Get()
+	me, err := client.User.Get(context.Background())
 	if err != nil {
 		panic(err)
 	}

@@ -26,14 +26,14 @@ type BareHome struct {
 }
 
 // Get returns the authenticated user.
-func (s *UserService) Get() (*User, error) {
+func (s *UserService) Get(ctx context.Context) (*User, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "me", nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var user *User
-	_, err = s.client.Do(context.Background(), req, &user)
+	_, err = s.client.Do(ctx, req, &user)
 	if err != nil {
 		return nil, err
 	}

@@ -141,14 +141,14 @@ type Weather struct {
 }
 
 // Get returns the home with the given ID.
-func (s *HomeService) Get(id int) (*Home, error) {
+func (s *HomeService) Get(ctx context.Context, id int) (*Home, error) {
 	req, err := s.client.NewRequest("GET", fmt.Sprintf("homes/%d", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var home *Home
-	_, err = s.client.Do(context.Background(), req, &home)
+	_, err = s.client.Do(ctx, req, &home)
 	if err != nil {
 		return nil, err
 	}
@@ -157,14 +157,14 @@ func (s *HomeService) Get(id int) (*Home, error) {
 }
 
 // GetAirComfort returns the air comfort of the home with the given ID.
-func (s *HomeService) GetAirComfort(id int) (*AirComfort, error) {
+func (s *HomeService) GetAirComfort(ctx context.Context, id int) (*AirComfort, error) {
 	req, err := s.client.NewRequest("GET", fmt.Sprintf("homes/%d/airComfort", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var airComfort *AirComfort
-	_, err = s.client.Do(context.Background(), req, &airComfort)
+	_, err = s.client.Do(ctx, req, &airComfort)
 	if err != nil {
 		return nil, err
 	}
@@ -173,14 +173,14 @@ func (s *HomeService) GetAirComfort(id int) (*AirComfort, error) {
 }
 
 // GetHeatSystem returns the heating system of the home with the given ID.
-func (s *HomeService) GetHeatingSystem(id int) (*HeatingSystem, error) {
+func (s *HomeService) GetHeatingSystem(ctx context.Context, id int) (*HeatingSystem, error) {
 	req, err := s.client.NewRequest("GET", fmt.Sprintf("homes/%d/heatingSystem", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var heatingSystem *HeatingSystem
-	_, err = s.client.Do(context.Background(), req, &heatingSystem)
+	_, err = s.client.Do(ctx, req, &heatingSystem)
 	if err != nil {
 		return nil, err
 	}
@@ -189,14 +189,14 @@ func (s *HomeService) GetHeatingSystem(id int) (*HeatingSystem, error) {
 }
 
 // GetFlowTemperatureOptimization returns the flow temperature optimization of the home with the given ID.
-func (s *HomeService) GetFlowTemperatureOptimization(id int) (*FlowTemperatureOptimization, error) {
+func (s *HomeService) GetFlowTemperatureOptimization(ctx context.Context, id int) (*FlowTemperatureOptimization, error) {
 	req, err := s.client.NewRequest("GET", fmt.Sprintf("homes/%d/flowTemperatureOptimization", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var flowTemperatureOptimization *FlowTemperatureOptimization
-	_, err = s.client.Do(context.Background(), req, &flowTemperatureOptimization)
+	_, err = s.client.Do(ctx, req, &flowTemperatureOptimization)
 	if err != nil {
 		return nil, err
 	}
@@ -205,14 +205,14 @@ func (s *HomeService) GetFlowTemperatureOptimization(id int) (*FlowTemperatureOp
 }
 
 // GetWeather returns the weather of the home with the given ID.
-func (s *HomeService) GetWeather(id int) (*Weather, error) {
+func (s *HomeService) GetWeather(ctx context.Context, id int) (*Weather, error) {
 	req, err := s.client.NewRequest("GET", fmt.Sprintf("homes/%d/weather", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var weather *Weather
-	_, err = s.client.Do(context.Background(), req, &weather)
+	_, err = s.client.Do(ctx, req, &weather)
 	if err != nil {
 		return nil, err
 	}
@@ -221,14 +221,14 @@ func (s *HomeService) GetWeather(id int) (*Weather, error) {
 }
 
 // GetState returns the state of the home with the given ID.
-func (s *HomeService) GetState(id int) (*State, error) {
+func (s *HomeService) GetState(ctx context.Context, id int) (*State, error) {
 	req, err := s.client.NewRequest("GET", fmt.Sprintf("homes/%d/state", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var state *State
-	_, err = s.client.Do(context.Background(), req, &state)
+	_, err = s.client.Do(ctx, req, &state)
 	if err != nil {
 		return nil, err
 	}
@@ -237,13 +237,13 @@ func (s *HomeService) GetState(id int) (*State, error) {
 }
 
 // SetState sets the state of the home with the given ID.
-func (s *HomeService) SetState(id int, presence Presence) error {
+func (s *HomeService) SetState(ctx context.Context, id int, presence Presence) error {
 	req, err := s.client.NewRequest("PUT", fmt.Sprintf("homes/%d/presenceLock", id), &map[string]string{"homePresence": string(presence)})
 	if err != nil {
 		return err
 	}
 
-	_, err = s.client.Do(context.Background(), req, nil)
+	_, err = s.client.Do(ctx, req, nil)
 	if err != nil {
 		return err
 	}

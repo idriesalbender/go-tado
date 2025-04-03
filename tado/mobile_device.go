@@ -49,14 +49,14 @@ type MobileDeviceSettings struct {
 }
 
 // List returns a list of all mobile devices for the provided home ID.
-func (s *MobileDeviceService) List(id int) (*[]MobileDevice, error) {
+func (s *MobileDeviceService) List(ctx context.Context, id int) (*[]MobileDevice, error) {
 	req, err := s.client.NewRequest("GET", fmt.Sprintf("homes/%d/mobileDevices", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var mobileDevices *[]MobileDevice
-	_, err = s.client.Do(context.Background(), req, &mobileDevices)
+	_, err = s.client.Do(ctx, req, &mobileDevices)
 	if err != nil {
 		return nil, err
 	}
@@ -65,14 +65,14 @@ func (s *MobileDeviceService) List(id int) (*[]MobileDevice, error) {
 }
 
 // Get returns the mobile device with the given ID for the provided home ID.
-func (s *MobileDeviceService) Get(homeID, deviceID int) (*MobileDevice, error) {
+func (s *MobileDeviceService) Get(ctx context.Context, homeID, deviceID int) (*MobileDevice, error) {
 	req, err := s.client.NewRequest("GET", fmt.Sprintf("homes/%d/mobileDevices/%d", homeID, deviceID), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var mobileDevice *MobileDevice
-	_, err = s.client.Do(context.Background(), req, &mobileDevice)
+	_, err = s.client.Do(ctx, req, &mobileDevice)
 	if err != nil {
 		return nil, err
 	}
@@ -81,13 +81,13 @@ func (s *MobileDeviceService) Get(homeID, deviceID int) (*MobileDevice, error) {
 }
 
 // Delete deletes the relationship between the given mobile device and home.
-func (s *MobileDeviceService) Delete(homeID, deviceID int) error {
+func (s *MobileDeviceService) Delete(ctx context.Context, homeID, deviceID int) error {
 	req, err := s.client.NewRequest("DELETE", fmt.Sprintf("homes/%d/mobileDevices/%d", homeID, deviceID), nil)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.client.Do(context.Background(), req, nil)
+	_, err = s.client.Do(ctx, req, nil)
 	if err != nil {
 		return err
 	}
@@ -96,14 +96,14 @@ func (s *MobileDeviceService) Delete(homeID, deviceID int) error {
 }
 
 // GetSettings returns the settings of the mobile device with the given ID for the provided home ID.
-func (s *MobileDeviceService) GetSettings(homeID, deviceID int) (*MobileDeviceSettings, error) {
+func (s *MobileDeviceService) GetSettings(ctx context.Context, homeID, deviceID int) (*MobileDeviceSettings, error) {
 	req, err := s.client.NewRequest("GET", fmt.Sprintf("homes/%d/mobileDevices/%d/settings", homeID, deviceID), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var settings *MobileDeviceSettings
-	_, err = s.client.Do(context.Background(), req, &settings)
+	_, err = s.client.Do(ctx, req, &settings)
 	if err != nil {
 		return nil, err
 	}
@@ -112,14 +112,14 @@ func (s *MobileDeviceService) GetSettings(homeID, deviceID int) (*MobileDeviceSe
 }
 
 // UpdateSettings updates the settings of the mobile device with the given ID for the provided home ID.
-func (s *MobileDeviceService) UpdateSettings(homeID, deviceID int, settings MobileDeviceSettings) (*MobileDeviceSettings, error) {
+func (s *MobileDeviceService) UpdateSettings(ctx context.Context, homeID, deviceID int, settings MobileDeviceSettings) (*MobileDeviceSettings, error) {
 	req, err := s.client.NewRequest("PUT", fmt.Sprintf("homes/%d/mobileDevices/%d/settings", homeID, deviceID), settings)
 	if err != nil {
 		return nil, err
 	}
 
 	var settings2 *MobileDeviceSettings
-	_, err = s.client.Do(context.Background(), req, &settings2)
+	_, err = s.client.Do(ctx, req, &settings2)
 	if err != nil {
 		return nil, err
 	}
